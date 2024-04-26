@@ -1,0 +1,58 @@
+# Jetson-nano-development-kit-install-opencv-cuda
+* Guide how to install OpenCV 4.5 with Cuda on Jetson Nano with Jetson Pack 4.6.4 and Cuda 10.2 CuDNN 8.2
+** Installing Jetpack
+1. You need a host machine have Ubuntu 18.04 and go there to download and install [[https://developer.nvidia.com/embedded/jetpack][Nvidia SDK Manager Install]]
+2. After install, you can open sdkmanager with command ~sdkmanager~
+
+** Boot OS
+1. Connect a jumper between GND and FC REC The FC REC and GND jumper on the back of the jetson
+2. Connect a micro USB to the Jetson Nano and the host machine.
+3. Then you need select a right version of your Jetson.
+4. Uncheck the DeepStream cuz we don't need it.
+5. SDK Manager Version will auto set to 4.6.4, if it not then you need to re-select it to the version 4.6.4.
+6. We only need flash a OS so uncheck the Jetson SDK Components.
+7. Click continue, set the username/password, and start the install (takes around 10 minutes if you already flash it before cuz the OS image is downloaded).
+8. When flash done, you will need to remove the micro USB and the jumper. Then Connect the power supply to the Jetson Nano.
+
+** Install Open CV 4.5.0 with Cuda
+1. After the first time setup up done, open terminal and using command ~df -h~ and you will see the OS take 4.9GB/16GB. Don't worry, it still enough for build Open CV, let run another command
+~sudo apt update~
+~sudo apt install nvidia-jetpack~ (This will takes aroud 15 min to download and install all the Cuda CuDNN,...)
+2. Let install jtop to check if cuda is detect or not.
+~sudo apt install python3-pip~
+~sudo pip3 install jetson-stats~
+Then run sudo jtop and press number 7 to check all information about ur OS. You will see we have OpenCV already but it not with CUDA, that why we need re-build OpenCV with cmake to let it work with CUDA.
+3. After ~nvidia-jetpack~ installed, let clone this script to install [[https://github.com/Qengineering/Install-OpenCV-Jetson-Nano/blob/main/OpenCV-4-5-0.sh][OpenCV-4-5-0.sh]]
+4. Let run this script with commmand ~sudo ./OpenCV-4-5-0.sh~ (This will takes around 5-6 hours to complete :)))) ).
+5. After this build done, now you can check with ~sudo jtop~ and yes, we have OpenCV with CUDA now.
+
+Now your lib cv2 is locate at ~/usr/lib/python3/dist-packages/~. You can go there and copy the folder cv2 to backup it to another venv later.
+
+In my case, at this point we have cv2 with CUDA. Now im insert a SD Card to Jetson Nano and create a python venv on SD Card.
+~sudo pip3 install python3-venv~
+~python3 -m venv my-venv~
+
+Then go to the locate of cv2 above and copy it, paste it to ~my-venv/lib/dist-packages/~. And now your new venv in SD Card already have cv2 with CUDA.
+You can test it by run
+~source my-venv/bin/activate~
+~python3~
+Then ~import cv2~. In my case this work perfectly!
+
+** Optional (In my case i got error while install on venv in SD Card but it install complete in Emmc. I recommend you also need install this lib first before copy all OS to SD Card)
+
+1. Let also install Onnx for this Jetson Nano.
+We need some space to install some package before we copy all OS to the SD Card. Let run command ~sudo apt clean~
+Then install another package ~sudo apt-get install protobuf-compiler libprotoc-dev~
+~pip3 install onnx==1.4.1~ 
+
+And now you have onnx.
+Notes: Lib Onnx is locate at ~/usr/local/lib/python3.6/dist-package/onnx~. So now you also can copy this onnx lib to ~my-venv~ like above.
+
+ - This guide takes me around a week to complete setup OpenCV with CUDA on this Jetson lol, im struggling with alot of error while build cmake for OpenCV. 
+
+** Credit
+- The USB drive boot files from [[https://github.com/jetsonhacks/bootFromUSB][Jetson Hacks]]
+- The partition and copy instructions were from the [[https://www.youtube.com/watch?v=53rRMr1IpWs&t=567s][Jetson Hacks Video]]
+- The blog guide install [[https://github.com/EdwardoSunny/Jetson-Nano-YOLOv8-Setup/tree/main][YoloV8 on Jetson]] 
+- The script to install [[https://github.com/Qengineering/Install-OpenCV-Jetson-Nano/tree/main][OpenCV on Jetson Nano]]
+
